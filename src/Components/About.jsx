@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import profileImg from "../Images/profileImg.jpg";
+import profileImg from "../Images/profileImg.png";
 
 export default function AboutSection() {
   const [hoveredCard, setHoveredCard] = useState(null);
