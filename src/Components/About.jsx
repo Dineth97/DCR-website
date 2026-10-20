@@ -1,8 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import profileImg from "../Images/profileImg.jpg";
 
 export default function AboutSection() {
   const [hoveredCard, setHoveredCard] = useState(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Screen size listener
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Info Cards Data
   const infoCards = [
@@ -37,21 +48,41 @@ export default function AboutSection() {
   ];
 
   return (
-    <section style={styles.section} id="about">
+    <section style={{
+      ...styles.section,
+      padding: isMobile ? '50px 16px' : '90px 20px'
+    }} id="about">
       <div style={styles.container}>
         
         {/* Section Header */}
-        <div style={styles.headerBox}>
+        <div style={{
+          ...styles.headerBox,
+          marginBottom: isMobile ? '35px' : '55px'
+        }}>
           <span style={styles.topBadge}>ABOUT ME</span>
-          <h2 style={styles.mainTitle}>Bridging Tech & Law with Creative Precision</h2>
+          <h2 style={{
+            ...styles.mainTitle,
+            fontSize: isMobile ? '24px' : '36px'
+          }}>
+            Bridging Tech & Law with Creative Precision
+          </h2>
         </div>
 
         {/* 2-Column Responsive Layout */}
-        <div style={styles.contentGrid}>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(320px, 1fr))',
+          gap: isMobile ? '30px' : '50px',
+          alignItems: 'center'
+        }}>
           
           {/* Left Column: Image Card */}
           <div style={styles.imageWrapper}>
-            <div style={styles.imageCard}>
+            <div style={{
+              ...styles.imageCard,
+              height: isMobile ? '360px' : '480px',
+              maxWidth: isMobile ? '100%' : '440px'
+            }}>
               <img 
                 src={profileImg}
                 alt="Dineth Rajapaksha" 
@@ -60,9 +91,21 @@ export default function AboutSection() {
               <div style={styles.imgGradientOverlay} />
               
               {/* Floating Glassmorphic Overlay Badge */}
-              <div style={styles.imgFloatingBadge}>
-                <h3 style={styles.badgeName}>Dineth Rajapaksha</h3>
-                <p style={styles.badgeRole}>Software Developer & Legal Scholar</p>
+              <div style={{
+                ...styles.imgFloatingBadge,
+                bottom: isMobile ? '16px' : '24px',
+                left: isMobile ? '16px' : '24px',
+                right: isMobile ? '16px' : '24px',
+                padding: isMobile ? '14px 16px' : '18px 22px'
+              }}>
+                <h3 style={{
+                  ...styles.badgeName,
+                  fontSize: isMobile ? '17px' : '20px'
+                }}>Dineth Rajapaksha</h3>
+                <p style={{
+                  ...styles.badgeRole,
+                  fontSize: isMobile ? '12px' : '13px'
+                }}>Software Developer & Legal Scholar</p>
               </div>
             </div>
           </div>
@@ -70,16 +113,27 @@ export default function AboutSection() {
           {/* Right Column: Bio & Info Grid */}
           <div style={styles.bioWrapper}>
             
-            <h3 style={styles.bioHeading}>
+            <h3 style={{
+              ...styles.bioHeading,
+              fontSize: isMobile ? '20px' : '26px'
+            }}>
               Passionate about building <span style={styles.highlightText}>impactful digital solutions</span> & modern web experiences.
             </h3>
 
-            <p style={styles.bioParagraph}>
+            <p style={{
+              ...styles.bioParagraph,
+              fontSize: isMobile ? '14px' : '15px',
+              marginBottom: isMobile ? '24px' : '32px'
+            }}>
               I'm a full-stack & mobile developer pursuing dual degrees in Information Technology at the University of Moratuwa and Law at OUSL. I blend structured analytical thinking with clean aesthetic coding to build scalable web applications, mobile apps, and intuitive user experiences.
             </p>
 
             {/* Info Cards Grid */}
-            <div style={styles.infoGrid}>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)',
+              gap: isMobile ? '12px' : '16px'
+            }}>
               {infoCards.map((card) => {
                 const isHovered = hoveredCard === card.id;
                 return (
@@ -119,7 +173,6 @@ export default function AboutSection() {
 
 const styles = {
   section: {
-    padding: '90px 20px',
     backgroundColor: '#ffffff',
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif'
   },
@@ -128,8 +181,7 @@ const styles = {
     margin: '0 auto'
   },
   headerBox: {
-    textAlign: 'center',
-    marginBottom: '55px'
+    textAlign: 'center'
   },
   topBadge: {
     fontSize: '12px',
@@ -145,17 +197,10 @@ const styles = {
     marginBottom: '12px'
   },
   mainTitle: {
-    fontSize: '36px',
     fontWeight: '800',
     color: '#0f172a',
     margin: 0,
     letterSpacing: '-0.5px'
-  },
-  contentGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
-    gap: '50px',
-    alignItems: 'center'
   },
   imageWrapper: {
     width: '100%',
@@ -165,8 +210,6 @@ const styles = {
   imageCard: {
     position: 'relative',
     width: '100%',
-    maxWidth: '440px',
-    height: '480px',
     borderRadius: '28px',
     overflow: 'hidden',
     boxShadow: '0 20px 40px -15px rgba(0,0,0,0.12)',
@@ -185,25 +228,19 @@ const styles = {
   },
   imgFloatingBadge: {
     position: 'absolute',
-    bottom: '24px',
-    left: '24px',
-    right: '24px',
     backgroundColor: 'rgba(255, 255, 255, 0.15)',
     backdropFilter: 'blur(12px)',
     WebkitBackdropFilter: 'blur(12px)',
     border: '1px solid rgba(255, 255, 255, 0.3)',
     borderRadius: '18px',
-    padding: '18px 22px',
     color: '#ffffff'
   },
   badgeName: {
-    fontSize: '20px',
     fontWeight: '700',
     margin: '0 0 4px 0',
     color: '#ffffff'
   },
   badgeRole: {
-    fontSize: '13px',
     color: '#cbd5e1',
     margin: 0,
     fontWeight: '500'
@@ -213,7 +250,6 @@ const styles = {
     flexDirection: 'column'
   },
   bioHeading: {
-    fontSize: '26px',
     fontWeight: '800',
     color: '#0f172a',
     lineHeight: '1.35',
@@ -223,18 +259,12 @@ const styles = {
     color: '#2563eb'
   },
   bioParagraph: {
-    fontSize: '15px',
     color: '#475569',
     lineHeight: '1.7',
     margin: '0 0 32px 0'
   },
-  infoGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(2, 1fr)',
-    gap: '16px'
-  },
   miniCard: {
-    padding: '18px 20px',
+    padding: '16px 18px',
     borderRadius: '18px',
     borderWidth: '1.5px',
     borderStyle: 'solid',
@@ -246,10 +276,10 @@ const styles = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: '10px'
+    marginBottom: '8px'
   },
   cardIcon: {
-    fontSize: '20px'
+    fontSize: '18px'
   },
   miniBadge: {
     fontSize: '10px',

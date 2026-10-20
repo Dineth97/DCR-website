@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 
 const techStack = [
   { name: 'REACT JS', icon: '⚛️' },
@@ -18,14 +18,25 @@ export default function TechTicker() {
 
   const trackRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const startX = useRef(0);
   const currentTranslate = useRef(0);
   const prevTranslate = useRef(0);
 
-  // Mouse Down (Drag පටන් ගන්න විට)
-  const handleMouseDown = (e) => {
+  // Screen size detector
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Helper function for drag start (Mouse & Touch)
+  const handleStart = (clientX) => {
     setIsDragging(true);
-    startX.current = e.clientX;
+    startX.current = clientX;
     
     if (trackRef.current) {
       const computedStyle = window.getComputedStyle(trackRef.current);
@@ -37,29 +48,45 @@ export default function TechTicker() {
     }
   };
 
-  // Mouse Move (Drag කරන විට)
-  const handleMouseMove = (e) => {
+  // Helper function for drag move (Mouse & Touch)
+  const handleMove = (clientX) => {
     if (!isDragging) return;
-    const currentX = e.clientX;
-    const diff = currentX - startX.current;
+    const diff = clientX - startX.current;
     currentTranslate.current = prevTranslate.current + diff;
     if (trackRef.current) {
       trackRef.current.style.transform = `translateX(${currentTranslate.current}px)`;
     }
   };
 
-  // Mouse Up / Leave (Drag ඉවර වූ විට)
-  const handleMouseUpOrLeave = () => {
+  // Helper function for drag end
+  const handleEnd = () => {
     if (!isDragging) return;
     setIsDragging(false);
     
     if (trackRef.current) {
-      trackRef.current.style.animation = 'marqueeScroll 35s linear infinite';
+      const duration = isMobile ? '25s' : '35s';
+      trackRef.current.style.animation = `marqueeScroll ${duration} linear infinite`;
     }
   };
 
+  // Mouse Handlers
+  const handleMouseDown = (e) => handleStart(e.clientX);
+  const handleMouseMove = (e) => handleMove(e.clientX);
+  const handleMouseUpOrLeave = () => handleEnd();
+
+  // Touch Handlers (for Mobile)
+  const handleTouchStart = (e) => handleStart(e.touches[0].clientX);
+  const handleTouchMove = (e) => handleMove(e.touches[0].clientX);
+  const handleTouchEnd = () => handleEnd();
+
+  const animationDuration = isMobile ? '25s' : '35s';
+
   return (
-    <div style={styles.tickerWrapper}>
+    <div style={{
+      ...styles.tickerWrapper,
+      margin: isMobile ? '15px 0' : '25px 0',
+      padding: isMobile ? '4px 0' : '6px 0'
+    }}>
       {/* Dynamic Pure CSS Animation Injection */}
       <style>
         {`
@@ -80,21 +107,40 @@ export default function TechTicker() {
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUpOrLeave}
         onMouseLeave={handleMouseUpOrLeave}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
       >
         <div
           ref={trackRef}
           style={{
             ...styles.tickerTrack,
-            animation: isDragging ? 'none' : 'marqueeScroll 35s linear infinite',
+            animation: isDragging ? 'none' : `marqueeScroll ${animationDuration} linear infinite`,
           }}
         >
           {quadStack.map((item, index) => (
-            <div key={index} style={styles.tickerItem}>
-              <div style={styles.badge}>
-                <span style={styles.icon}>{item.icon}</span>
-                <span style={styles.name}>{item.name}</span>
+            <div key={index} style={{
+              ...styles.tickerItem,
+              gap: isMobile ? '8px' : '12px',
+              padding: isMobile ? '0 5px' : '0 8px'
+            }}>
+              <div style={{
+                ...styles.badge,
+                padding: isMobile ? '3px 9px' : '4px 12px'
+              }}>
+                <span style={{
+                  ...styles.icon,
+                  fontSize: isMobile ? '12px' : '14px'
+                }}>{item.icon}</span>
+                <span style={{
+                  ...styles.name,
+                  fontSize: isMobile ? '10px' : '11.5px'
+                }}>{item.name}</span>
               </div>
-              <span style={styles.dot}>•</span>
+              <span style={{
+                ...styles.dot,
+                fontSize: isMobile ? '11px' : '14px'
+              }}>•</span>
             </div>
           ))}
         </div>
@@ -110,8 +156,6 @@ const styles = {
     background: 'linear-gradient(90deg, rgba(239, 246, 255, 0.6) 0%, rgba(255, 255, 255, 0.9) 50%, rgba(239, 246, 255, 0.6) 100%)',
     borderTop: '1px solid #e2e8f0',
     borderBottom: '1px solid #e2e8f0',
-    padding: '6px 0',
-    margin: '25px 0',
     position: 'relative',
     userSelect: 'none',
     boxShadow: 'inset 0 1px 3px 0 rgba(0, 0, 0, 0.01)',
@@ -131,8 +175,6 @@ const styles = {
   tickerItem: {
     display: 'inline-flex',
     alignItems: 'center',
-    gap: '12px',
-    padding: '0 8px',
   },
   badge: {
     display: 'inline-flex',
@@ -140,23 +182,20 @@ const styles = {
     gap: '6px',
     backgroundColor: '#ffffff',
     border: '1px solid #dbeafe',
-    padding: '4px 12px',
     borderRadius: '20px',
     boxShadow: '0 1px 4px rgba(37, 99, 235, 0.04)',
   },
   icon: {
-    fontSize: '14px',
+    display: 'inline-block'
   },
   name: {
     color: '#1e293b',
-    fontSize: '11.5px',
     fontWeight: '700',
     letterSpacing: '0.6px',
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
   },
   dot: {
     color: '#2563eb',
-    fontSize: '14px',
     fontWeight: 'bold',
     opacity: 0.4,
   },
