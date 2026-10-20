@@ -1,18 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 export default function Home() {
   const [activeIndex, setActiveIndex] = useState(1);
   const [isMobile, setIsMobile] = useState(false);
 
-  // Screen resize detector for dynamic responsiveness
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  // Swipe / Drag tracking refs
+  const startX = useRef(0);
+  const isDragging = useRef(false);
 
   const cards = [
     {
@@ -39,12 +33,43 @@ export default function Home() {
     }
   ];
 
+  // Screen resize detector for dynamic responsiveness
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const handleNext = () => {
     setActiveIndex((prev) => (prev + 1) % cards.length);
   };
 
   const handlePrev = () => {
     setActiveIndex((prev) => (prev - 1 + cards.length) % cards.length);
+  };
+
+  // Touch and Mouse Drag Handlers for Mobile Swipe Support
+  const handleDragStart = (clientX) => {
+    isDragging.current = true;
+    startX.current = clientX;
+  };
+
+  const handleDragEnd = (clientX) => {
+    if (!isDragging.current) return;
+    const diff = clientX - startX.current;
+    
+    // Threshold to determine swipe direction (min 50px movement)
+    if (Math.abs(diff) > 50) {
+      if (diff > 0) {
+        handlePrev(); // Swipe Right -> Previous Card
+      } else {
+        handleNext(); // Swipe Left -> Next Card
+      }
+    }
+    isDragging.current = false;
   };
 
   return (
@@ -79,17 +104,25 @@ export default function Home() {
         </span>
       </div>
 
-      {/* 3D Perspective Card Container */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        perspective: isMobile ? '800px' : '1200px',
-        width: '100%',
-        maxWidth: '1200px',
-        height: isMobile ? '400px' : '460px',
-        position: 'relative'
-      }}>
+      {/* 3D Perspective Card Container with Swipe Support */}
+      <div 
+        onMouseDown={(e) => handleDragStart(e.clientX)}
+        onMouseUp={(e) => handleDragEnd(e.clientX)}
+        onTouchStart={(e) => handleDragStart(e.touches[0].clientX)}
+        onTouchEnd={(e) => handleDragEnd(e.changedTouches[0].clientX)}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          perspective: isMobile ? '800px' : '1200px',
+          width: '100%',
+          maxWidth: '1200px',
+          height: isMobile ? '400px' : '460px',
+          position: 'relative',
+          cursor: 'grab',
+          touchAction: 'pan-y'
+        }}
+      >
         {cards.map((card, idx) => {
           let position = idx - activeIndex;
           if (position < -1) position += cards.length;
@@ -99,7 +132,6 @@ export default function Home() {
           const isLeft = position === -1;
           const isRight = position === 1;
 
-          // Responsive Card Width & Offset distance
           const cardWidth = isMobile ? '88vw' : '420px';
           const maxCardWidth = isMobile ? '340px' : '420px';
           const offsetX = isMobile ? 180 : 340;
