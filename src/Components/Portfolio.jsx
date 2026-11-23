@@ -1,125 +1,107 @@
-import React, { useState, useEffect } from 'react';
-import { client, urlFor } from '../sanityClient'; // path එක ඔයාගේ project structure එකට අනුව වෙනස් වෙන්න පුළුවන්
+import React, { useState } from 'react';
 
 export default function PortfolioSection() {
   const [hoveredIndex, setHoveredIndex] = useState(null);
-  const [projects, setProjects] = useState([]);
-  const [loading, setLoading] = useState(true);
 
-  // Sanity එකෙන් data fetch කරගැනීම
-  useEffect(() => {
-    client
-      .fetch(`*[_type == "project"]`)
-      .then((data) => {
-        setProjects(data);
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.error('Error fetching projects:', error);
-        setLoading(false);
-      });
-  }, []);
+  // ඔයාගේ Actual Projects List එක
+  const projects = [
+    {
+      title: "Dahanakamulla Family Tree",
+      category: "Web Application",
+      description: "An interactive digital family tree web application built to visualize and preserve generational lineage with intuitive navigation and detailed profile views.",
+      tags: ["React", "JavaScript", "Tailwind CSS"],
+      demoUrl: "https://example.com", // Live link එක නැත්නම් '#' දාන්න
+      githubUrl: "https://github.com"
+    },
+    {
+      title: "University GPA Calculator",
+      category: "Mobile Application",
+      description: "A tailored mobile application built with Flutter to assist university students in calculating, tracking, and predicting semester and overall GPAs effortlessly.",
+      tags: ["Flutter", "Dart", "Mobile Dev"],
+      demoUrl: null, // Mobile app හින්දා Demo නැත්නම් null දාන්න පුළුවන්
+      githubUrl: "https://github.com"
+    }
+  ];
 
   return (
     <section style={styles.section} id="portfolio">
       <div style={styles.container}>
-        
+       
         {/* Section Header */}
         <h2 style={styles.mainTitle}>Featured Projects</h2>
         <p style={styles.subTitle}>
           Here are some of the key web and mobile development projects I've built.
         </p>
 
-        {/* Loading State හෝ Projects Responsive Grid */}
-        {loading ? (
-          <p style={{ textAlign: 'center', color: '#64748b' }}>Loading projects from Sanity...</p>
-        ) : projects.length === 0 ? (
-          <p style={{ textAlign: 'center', color: '#64748b' }}>No projects found. Please add some from Sanity Studio.</p>
-        ) : (
-          <div style={styles.grid}>
-            {projects.map((project, index) => {
-              const isHovered = hoveredIndex === index;
-              return (
-                <div
-                  key={project._id || index}
-                  style={{
-                    ...styles.card,
-                    borderColor: isHovered ? '#2563eb' : '#e2e8f0',
-                    boxShadow: isHovered
-                      ? '0 20px 35px -10px rgba(37, 99, 235, 0.15), 0 10px 15px -5px rgba(0, 0, 0, 0.04)'
-                      : '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
-                    transform: isHovered ? 'translateY(-6px)' : 'translateY(0px)',
-                    background: isHovered 
-                      ? 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)' 
-                      : '#ffffff'
-                  }}
-                  onMouseEnter={() => setHoveredIndex(index)}
-                  onMouseLeave={() => setHoveredIndex(null)}
-                >
-                  <div>
-                    {/* Project Image (Sanity image එකක් තියෙන නම් පෙන්වයි) */}
-                    {project.image && (
-                      <div style={{ marginBottom: '16px', overflow: 'hidden', borderRadius: '12px' }}>
-                        <img 
-                          src={urlFor(project.image).url()} 
-                          alt={project.title} 
-                          style={{ width: '100%', height: '180px', objectFit: 'cover', display: 'block' }}
-                        />
-                      </div>
-                    )}
-
-                    {/* Category Badge */}
-                    <div style={styles.categoryBadge}>
-                      {project.category || 'Development'}
-                    </div>
-
-                    {/* Project Title */}
-                    <h3 style={styles.projectTitle}>{project.title}</h3>
-
-                    {/* Description */}
-                    <p style={styles.projectDesc}>{project.description}</p>
-
-                    {/* Tech Stack Pills */}
-                    {project.technologies && project.technologies.length > 0 && (
-                      <div style={styles.tagsContainer}>
-                        {project.technologies.map((tag, tagIndex) => (
-                          <span key={tagIndex} style={styles.tagPill}>
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Footer Action Links */}
-                  <div style={styles.actionGroup}>
-                    {project.projectUrl && (
-                      <a
-                        href={project.projectUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={styles.primaryBtn}
-                      >
-                        <span>🚀</span> Live Demo
-                      </a>
-                    )}
-                    {project.githubUrl && (
-                      <a
-                        href={project.githubUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={styles.secondaryBtn}
-                      >
-                        <span>💻</span> GitHub Repo
-                      </a>
-                    )}
-                  </div>
-
+        {/* Projects Responsive Grid */}
+        <div style={styles.grid}>
+          {projects.map((project, index) => {
+            const isHovered = hoveredIndex === index;
+            return (
+              <div
+                key={index}
+                style={{
+                  ...styles.card,
+                  borderColor: isHovered ? '#2563eb' : '#e2e8f0',
+                  boxShadow: isHovered
+                    ? '0 20px 35px -10px rgba(37, 99, 235, 0.15), 0 10px 15px -5px rgba(0, 0, 0, 0.04)'
+                    : '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                  transform: isHovered ? 'translateY(-6px)' : 'translateY(0px)',
+                  background: isHovered
+                    ? 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)'
+                    : '#ffffff'
+                }}
+                onMouseEnter={() => setHoveredIndex(index)}
+                onMouseLeave={() => setHoveredIndex(null)}
+              >
+                {/* Category Badge */}
+                <div style={styles.categoryBadge}>
+                  {project.category}
                 </div>
-              );
-            })}
-          </div>
-        )}
+
+                {/* Project Title */}
+                <h3 style={styles.projectTitle}>{project.title}</h3>
+
+                {/* Description */}
+                <p style={styles.projectDesc}>{project.description}</p>
+
+                {/* Tech Stack Pills */}
+                <div style={styles.tagsContainer}>
+                  {project.tags.map((tag, tagIndex) => (
+                    <span key={tagIndex} style={styles.tagPill}>
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+
+                {/* Footer Action Links */}
+                <div style={styles.actionGroup}>
+                  {project.demoUrl && (
+                    <a
+                      href={project.demoUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={styles.primaryBtn}
+                    >
+                      <span>🚀</span> Live Demo
+                    </a>
+                  )}
+                  {project.githubUrl && (
+                    <a
+                      href={project.githubUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={styles.secondaryBtn}
+                    >
+                      <span>💻</span> GitHub Repo
+                    </a>
+                  )}
+                </div>
+
+              </div>
+            );
+          })}
+        </div>
 
       </div>
     </section>
@@ -212,12 +194,12 @@ const styles = {
     border: '1px solid #e2e8f0'
   },
   actionGroup: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
+    display: 'flex',
     gap: '12px',
-    width: '100%'
+    flexWrap: 'wrap'
   },
   primaryBtn: {
+    flex: '1 1 auto',
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -233,6 +215,7 @@ const styles = {
     boxShadow: '0 4px 12px rgba(37, 99, 235, 0.2)'
   },
   secondaryBtn: {
+    flex: '1 1 auto',
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -247,4 +230,4 @@ const styles = {
     textDecoration: 'none',
     transition: 'all 0.2s ease'
   }
-};
+}; 
