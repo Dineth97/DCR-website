@@ -29,7 +29,7 @@ export default function AboutSection() {
       icon: '⚖️',
       label: 'LL.B Degree',
       value: 'Open University of Sri Lanka',
-      badge: 'Level 5'
+      badge: 'Final Year'
     },
     {
       id: 'loc',
